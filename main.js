@@ -11,6 +11,22 @@ const url = require('url')
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
+const {ipcMain} = require('electron')
+
+ipcMain.on('get-path', (event) => {
+  approot = getAppRoot()
+  event.returnValue = approot;
+})
+
+function getAppRoot() {
+  if ( process.platform === 'win32' ) {
+    // return __dirname
+    return process.env.PORTABLE_EXECUTABLE_DIR;
+  }  else if (process.platform === 'darwin') {
+    return __dirname
+  }
+}
+
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})

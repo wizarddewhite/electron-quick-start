@@ -2,15 +2,38 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>GapSeeker!</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <h1>Help you find a gap.</h1>
+    <form name="form1">
+	    <strong> Target Exchange</strong>
+    <br>
+      <input type="checkbox" name="ex" value="bigone"> bigone
+      <input type="checkbox" name="ex" value="binance"> binance
+      <input type="checkbox" name="ex" value="okex"> okex
+      <input type="checkbox" name="ex" value="huobi"> huobi
+    <br>
+    </form>
+    <form name="form2">
+	    <strong>Target Coins </strong>
+    <br>
+      <input type="checkbox" name="coin" value="btc"> btc
+      <input type="checkbox" name="coin" value="eth"> eth
+      <input type="checkbox" name="coin" value="neo"> neo
+      <input type="checkbox" name="coin" value="xmr"> xmr
+    <br>
+    </form>
+    <form name="form3">
+      <strong>Duration:</strong> <input type="text" id="duration" /> Hour <br>
+      <strong>Minimum Gap:</strong> <input type="text" id="gap" /> % <br>
+      <strong>Minimum Amount:</strong> <input type="text" id="amount" /> <br>
+    </form>
+    <button onclick="run()" class="fa fa-pencil-square-o" data-dismiss="alert">Run</button>
+    <button onclick="stop()" class="fa fa-pencil-square-o" data-dismiss="alert">Stop</button>
     <div>
       <textarea id="output" cols="90" rows="10" class="form-control"></textarea>
     </div>
-    <button onclick="run()" class="fa fa-pencil-square-o" data-dismiss="alert">Run</button>
-    <button onclick="stop()" class="fa fa-pencil-square-o" data-dismiss="alert">Stop</button>
 
     <script>
       // You can also require other files to run in this process
@@ -24,14 +47,44 @@
               return
           }
 
+	  // get exchanges
+	  ex_obj = document.getElementsByName("ex");
+	  exs = []
+	  for (k in ex_obj) {
+	  if (ex_obj[k].checked) {
+	      exs.push(ex_obj[k].value)
+	  }
+	  }
+
+	  // get coins
+	  coin_obj = document.getElementsByName("coin");
+	  coins = []
+	  for (k in coin_obj) {
+	  if (coin_obj[k].checked) {
+	      coins.push(coin_obj[k].value)
+	  }
+	  }
+
+	  // get duration, gap, amount
+	  duration = document.getElementById("duration");
+	  gap = document.getElementById("gap");
+	  amount = document.getElementById("amount");
+	  if (duration.value.length == 0 || gap.value.length == 0 ||
+		  amount.value.length == 0) {
+              document.getElementById("output").innerHTML += "Please Specify Duration|Gap|Amount\n";
+	      return
+	  }
+
           path = ipcRenderer.sendSync('get-path')
           if ( process.platform === 'win32' ) {
-              command = 'dir';
+              command = 'find_gap';
           }  else if (process.platform === 'darwin') {
-              command = 'ls';
+              command = './find_gap';
           }
           var spawn = require('child_process').spawn,
-              child = spawn(command, {cwd: path});
+              child = spawn(command, ['run',exs.join(' '), coins.join(' '),
+		      duration.value, gap.value, amount.value],
+		      {cwd: path});
 
           document.getElementById("output").innerHTML = "Starting...\n";
           this.child = child
@@ -52,7 +105,7 @@
               document.getElementById("output").innerHTML += "\nAlready Stopped";
           } else {
               child.kill()
-              this.child = null
+              child = null
           }
       }
     </script>

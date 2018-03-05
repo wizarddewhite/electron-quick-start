@@ -6,11 +6,11 @@
   </head>
   <body>
     <h1>Help you find a gap.</h1>
-	    <strong> Target Exchange</strong>
+            <strong> Target Exchange</strong> <input type="checkbox" onclick="toggle_exchanges()"\> Select All
     <br>
     <div id="exchange"> </div>
     <br>
-	    <strong>Target Coins </strong>
+            <strong>Target Coins </strong> <input type="checkbox" onclick="toggle_coins()"\> Select All
     <br>
     <div id="coins"> </div>
     <br>
@@ -99,47 +99,13 @@
           }
       }
 
-      function prepare() {
-          path = ipcRenderer.sendSync('get-path')
-          if ( process.platform === 'win32' ) {
-              command = 'util exchanges';
-          }  else if (process.platform === 'darwin') {
-              command = './util';
-          }
-
-        var spawn = require('child_process').spawnSync,
-            child = spawn(command, ["exchanges"], {cwd: path});
-
-	console.log(child.stdout.toString())
-
-        //child.stdout.on('data', function (data) {
-	//	console.log(data.toString())
-        //});
-        //child.stderr.on('data', function (data) {
-        //});
-        //child.on('exit', function (data) {
-        //});
-      }
-
-      function refresh() {
-          path = ipcRenderer.sendSync('get-path')
-          if ( process.platform === 'win32' ) {
-              command = 'util';
-          }  else if (process.platform === 'darwin') {
-              command = './util';
-          }
-
+      function draw_exchanges(path) {
 	  // get exchanges
           var spawn = require('child_process').spawnSync,
               child = spawn(command, ["exchanges"], {cwd: path});
 
-	  exs = child.stdout.toString().split(" ")
-
-	  // get coins
-          var spawn = require('child_process').spawnSync,
-              child = spawn(command, ["coins"], {cwd: path});
-
-	  cs = child.stdout.toString().split(" ")
+	  exs = child.stdout.toString().replace(/\n$/, '').split(" ")
+	  console.log(exs)
 
 	  // draw exchanges
           exchange = document.getElementById('exchange');
@@ -151,16 +117,54 @@
 	  }
           ex_div.innerHTML = ex_html
           exchange.appendChild(ex_div);
+      }
 
-          coin = document.getElementById('coins');
-          coin_div = document.createElement('div');
-          coin_html = ""
-	  //cs = ["btc", "eth", "neo", "xmr", "eos"]
-	  for (i in cs) {
-              coin_html +=  "<input type=\"checkbox\" name=\"coin\" value=\""+cs[i]+"\"> " + cs[i];
+      function toggle_exchanges() {
+          exchange = document.getElementById('exchange');
+          div = exchange.children[0];
+          for (i = 0; i < div.childElementCount; i++) {
+              div.children[i].checked = !div.children[i].checked;
 	  }
-          coin_div.innerHTML = coin_html
-          coin.appendChild(coin_div);
+      }
+
+      function draw_coins(path) {
+	  // get coins
+          var spawn = require('child_process').spawn,
+              child = spawn(command, ["coins"], {cwd: path});
+
+          child.stdout.on('data', function (data) {
+	      cs = data.toString().replace(/\n$/,'').split(" ")
+	      // draw coins
+              coin = document.getElementById('coins');
+              coin_div = document.createElement('div');
+              coin_html = ""
+	      //cs = ["btc", "eth", "neo", "xmr", "eos"]
+	      for (i in cs) {
+                  coin_html +=  "<input type=\"checkbox\" name=\"coin\" value=\""+cs[i]+"\"> " + cs[i];
+	      }
+              coin_div.innerHTML = coin_html;
+              coin.appendChild(coin_div);
+          });
+      }
+
+      function toggle_coins() {
+          exchange = document.getElementById('coins');
+          div = exchange.children[0];
+          for (i = 0; i < div.childElementCount; i++) {
+              div.children[i].checked = !div.children[i].checked;
+	  }
+      }
+
+      function refresh() {
+          path = ipcRenderer.sendSync('get-path')
+          if ( process.platform === 'win32' ) {
+              command = 'util';
+          }  else if (process.platform === 'darwin') {
+              command = './util';
+          }
+
+	  draw_exchanges(path)
+	  draw_coins(path)
       }
 
       window.onload = refresh;

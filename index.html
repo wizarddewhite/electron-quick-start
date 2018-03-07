@@ -6,15 +6,20 @@
   </head>
   <body>
     <h1>Help you find a gap.</h1>
-            <strong> Target Exchange</strong> <input type="checkbox" onclick="toggle_exchanges()"\> All Exchanges
+            <strong> Target Exchange</strong> <input type="checkbox" onclick="toggle_exchanges()"\> All
     <br>
     <div id="exchange"> </div>
     <br>
-            <strong>Target Coins </strong> <input type="checkbox" onclick="toggle_coins()"\> All Coins
+            <strong>Base Currency </strong>
     <br>
-    <input type="checkbox" name="coin" value=btc > <b>btc</b></input>
-    <input type="checkbox" name="coin" value=eth > <b>eth</b></input>
-    <input type="checkbox" name="coin" value=usdt > <b>usdt</b></input>
+    <div id="base">
+      <input type="checkbox" name="base" value=btc > <b>btc</b></input>
+      <input type="checkbox" name="base" value=eth > <b>eth</b></input>
+      <input type="checkbox" name="base" value=usdt > <b>usdt</b></input>
+    </div>
+    <br>
+            <strong>Quote Currency </strong> <input type="checkbox" onclick="toggle_coins()"\> All
+    <br>
     <br>
     <div id="coins"> </div>
     <br>
@@ -46,18 +51,42 @@
 	  ex_obj = document.getElementsByName("ex");
 	  exs = []
 	  for (k in ex_obj) {
-	  if (ex_obj[k].checked) {
-	      exs.push(ex_obj[k].value)
+	    if (ex_obj[k].checked) {
+	        exs.push(ex_obj[k].value)
+	    }
 	  }
+
+	  if (exs.length < 2) {
+            document.getElementById("output").innerHTML = "At least two exchanges\n";
+            return
+	  }
+
+	  // get base
+	  base_obj = document.getElementsByName("base");
+	  base = []
+	  for (k in base_obj) {
+	    if (base_obj[k].checked) {
+	        base.push(base_obj[k].value)
+	    }
+	  }
+
+	  if (base.length < 1) {
+            document.getElementById("output").innerHTML = "At least one base currency\n";
+            return
 	  }
 
 	  // get coins
 	  coin_obj = document.getElementsByName("coin");
 	  coins = []
 	  for (k in coin_obj) {
-	  if (coin_obj[k].checked) {
-	      coins.push(coin_obj[k].value)
+	    if (coin_obj[k].checked) {
+	        coins.push(coin_obj[k].value)
+	    }
 	  }
+
+	  if (base.length == 1 && coins.length == 0) {
+            document.getElementById("output").innerHTML = "At least one quote currency\n";
+            return
 	  }
 
 	  // get duration, timeout, gap, amount
@@ -78,7 +107,7 @@
               command = './find_gap';
           }
           var spawn = require('child_process').spawn,
-              child = spawn(command, ['run',exs.join(' '), coins.join(' '),
+              child = spawn(command, ['run',exs.join(' '), base.join(' '), coins.join(' '),
 		      duration.value, timeout.value, gap.value, amount.value],
 		      {cwd: path});
 

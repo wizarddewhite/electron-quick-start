@@ -6,18 +6,23 @@
   </head>
   <body>
     <h1>Help you find a gap.</h1>
-            <strong> Target Exchange</strong> <input type="checkbox" onclick="toggle_exchanges()"\> Select All
+            <strong> Target Exchange</strong> <input type="checkbox" onclick="toggle_exchanges()"\> All Exchanges
     <br>
     <div id="exchange"> </div>
     <br>
-            <strong>Target Coins </strong> <input type="checkbox" onclick="toggle_coins()"\> Select All
+            <strong>Target Coins </strong> <input type="checkbox" onclick="toggle_coins()"\> All Coins
+    <br>
+    <input type="checkbox" name="coin" value=btc > <b>btc</b></input>
+    <input type="checkbox" name="coin" value=eth > <b>eth</b></input>
+    <input type="checkbox" name="coin" value=usdt > <b>usdt</b></input>
     <br>
     <div id="coins"> </div>
     <br>
     <form name="form3">
-      <strong>Duration:</strong> <input type="text" id="duration" /> Hour <br>
-      <strong>Minimum Gap:</strong> <input type="text" id="gap" /> % <br>
-      <strong>Minimum Amount:</strong> <input type="text" id="amount" /> <br>
+      <strong>Duration:</strong> <input type="text" id="duration" value="1" /> Hour <br>
+      <strong>HttpTimOut:</strong> <input type="text" id="timeout" value="1"/> Second <br>
+      <strong>Minimum Gap:</strong> <input type="text" id="gap" value="0.2"/> % <br>
+      <strong>Minimum Amount:</strong> <input type="text" id="amount" value="1"/> <br>
     </form>
     <button onclick="run()" class="fa fa-pencil-square-o" data-dismiss="alert">Run</button>
     <button onclick="stop()" class="fa fa-pencil-square-o" data-dismiss="alert">Stop</button>
@@ -55,12 +60,13 @@
 	  }
 	  }
 
-	  // get duration, gap, amount
+	  // get duration, timeout, gap, amount
 	  duration = document.getElementById("duration");
+	  timeout = document.getElementById("timeout");
 	  gap = document.getElementById("gap");
 	  amount = document.getElementById("amount");
-	  if (duration.value.length == 0 || gap.value.length == 0 ||
-		  amount.value.length == 0) {
+	  if (duration.value.length == 0 || timeout.value.length == 0
+		 || gap.value.length == 0 || amount.value.length == 0) {
               document.getElementById("output").innerHTML += "Please Specify Duration|Gap|Amount\n";
 	      return;
 	  }
@@ -73,13 +79,15 @@
           }
           var spawn = require('child_process').spawn,
               child = spawn(command, ['run',exs.join(' '), coins.join(' '),
-		      duration.value, gap.value, amount.value],
+		      duration.value, timeout.value, gap.value, amount.value],
 		      {cwd: path});
 
           document.getElementById("output").innerHTML = "Starting...\n";
           this.child = child;
           child.stdout.on('data', function (data) {
-              document.getElementById("output").innerHTML += data;
+              obj = document.getElementById("output")
+              obj.innerHTML += data;
+              obj.scrollTop = obj.scrollHeight;
           });
           child.stderr.on('data', function (data) {
               document.getElementById("output").innerHTML += data;
@@ -133,7 +141,7 @@
               child = spawn(command, ["coins"], {cwd: path});
 
           child.stdout.on('data', function (data) {
-	      cs = data.toString().replace(/\n$/,'').split(" ")
+	      cs = data.toString().replace(/123 |1st |456 |btc |eth |usdt /g,'').replace(/\n$/,'').split(" ")
 	      // draw coins
               coin = document.getElementById('coins');
               coin_div = document.createElement('div');

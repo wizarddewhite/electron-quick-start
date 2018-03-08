@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
     <title>GapSeeker!</title>
   </head>
   <body>
@@ -31,6 +32,24 @@
     </form>
     <button onclick="run()" class="fa fa-pencil-square-o" data-dismiss="alert">Run</button>
     <button onclick="stop()" class="fa fa-pencil-square-o" data-dismiss="alert">Stop</button>
+
+    <!-- Tab links -->
+    <div class="tab">
+      <button class="tablinks" style="display:none" onclick="openCity(event, 'London')">Order in count</button>
+      <button class="tablinks" style="display:none" onclick="openCity(event, 'Paris')">Order in gap</button>
+      <button class="tablinks" style="display:none" onclick="openCity(event, 'Tokyo')">Order in amount</button>
+    </div>
+    
+    <!-- Tab content -->
+    <textarea id="London" class="tabcontent" cols="90" rows="10" >
+    </textarea>
+    
+    <textarea id="Paris" class="tabcontent" cols="90" rows="10" >
+    </textarea>
+    
+    <textarea id="Tokyo" class="tabcontent" cols="90" rows="10" >
+    </textarea>
+
     <div>
       <textarea id="output" cols="90" rows="10" class="form-control"></textarea>
     </div>
@@ -40,6 +59,7 @@
       require('./renderer.js')
       const {ipcRenderer, clipboard} = require('electron')
       var child = null
+      var order_gap_start = -1, order_count_start = -1, order_amount_start = -1
 
       function run() {
           if (this.child != null) {
@@ -112,11 +132,39 @@
 		      {cwd: path});
 
           document.getElementById("output").innerHTML = "Starting...\n";
+	  hideTab()
+          order_gap_start = -1, order_count_start = -1, order_amount_start = -1
           this.child = child;
           child.stdout.on('data', function (data) {
               obj = document.getElementById("output")
               obj.innerHTML += data;
               obj.scrollTop = obj.scrollHeight;
+              if (order_count_start == -1) {
+	          order_count_start = data.toString().search("Order in count")
+	      }
+              if (order_gap_start == -1) {
+	          order_gap_start = data.toString().search("Order in gap")
+	      }
+              if (order_amount_start == -1) {
+	          order_amount_start = data.toString().search("Order in amount")
+	      }
+
+              if (order_count_start != -1 && order_gap_start != -1 && 
+	          order_amount_start != -1) {
+                  displayTab()
+                  console.log(order_count_start)
+                  console.log(order_gap_start)
+                  console.log(order_amount_start)
+                  tabcontent = document.getElementsByClassName("tabcontent");
+		  tabcontent[0].innerHTML =
+			      data.toString().substring(order_count_start + 15,
+				      order_gap_start - 5)
+		  tabcontent[1].innerHTML =
+			      data.toString().substring(order_gap_start + 13,
+				      order_amount_start - 5)
+		  tabcontent[2].innerHTML =
+			      data.toString().substring(order_amount_start + 16)
+	      }
           });
           child.stderr.on('data', function (data) {
               document.getElementById("output").innerHTML += data;
@@ -205,6 +253,65 @@
       }
 
       window.onload = refresh;
+
+      function openCity(evt, cityName) {
+          // Declare all variables
+          var i, tabcontent, tablinks;
+      
+          // Get all elements with class="tabcontent" and hide them
+          tabcontent = document.getElementsByClassName("tabcontent");
+          for (i = 0; i < tabcontent.length; i++) {
+              tabcontent[i].style.display = "none";
+          }
+      
+          // Get all elements with class="tablinks" and remove the class "active"
+          tablinks = document.getElementsByClassName("tablinks");
+          for (i = 0; i < tablinks.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" active", "");
+	      tablinks[i].style.display = "block"
+          }
+      
+          // Show the current tab, and add an "active" class to the button that opened the tab
+          document.getElementById(cityName).style.display = "block";
+          evt.currentTarget.className += " active";
+      }
+
+      function displayTab() {
+          // Declare all variables
+          var i, tabcontent, tablinks;
+      
+          // Get all elements with class="tabcontent" and hide them
+          tabcontent = document.getElementsByClassName("tabcontent");
+          for (i = 0; i < tabcontent.length; i++) {
+              tabcontent[i].style.display = "none";
+          }
+              tabcontent[0].style.display = "block";
+      
+          // Get all elements with class="tablinks" and remove the class "active"
+          tablinks = document.getElementsByClassName("tablinks");
+          for (i = 0; i < tablinks.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" active", "");
+	      tablinks[i].style.display = "block"
+          }
+      }
+
+      function hideTab() {
+          // Declare all variables
+          var i, tabcontent, tablinks;
+      
+          // Get all elements with class="tabcontent" and hide them
+          tabcontent = document.getElementsByClassName("tabcontent");
+          for (i = 0; i < tabcontent.length; i++) {
+              tabcontent[i].style.display = "none";
+          }
+      
+          // Get all elements with class="tablinks" and remove the class "active"
+          tablinks = document.getElementsByClassName("tablinks");
+          for (i = 0; i < tablinks.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" active", "");
+	      tablinks[i].style.display = "none"
+          }
+      }
     </script>
   </body>
 </html>

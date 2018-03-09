@@ -132,7 +132,7 @@
           }
           var spawn = require('child_process').spawn,
               child = spawn(command, ['run',exs.join(' '), base.join(' '), coins.join(' '),
-		      duration.value, timeout.value, gap.value, amount.value],
+		      duration.value, timeout.value, "--", gap.value, amount.value],
 		      {cwd: path});
 
           document.getElementById("output").innerHTML = "Starting...\n";
@@ -144,30 +144,30 @@
               obj.innerHTML += data;
               obj.scrollTop = obj.scrollHeight;
               if (order_count_start == -1) {
-	          order_count_start = data.toString().search("Order in count")
+	          order_count_start = obj.innerHTML.toString().search("Order in count")
 	      }
               if (order_gap_start == -1) {
-	          order_gap_start = data.toString().search("Order in gap")
+	          order_gap_start = obj.innerHTML.toString().search("Order in gap")
 	      }
               if (order_amount_start == -1) {
-	          order_amount_start = data.toString().search("Order in amount")
+	          order_amount_start = obj.innerHTML.toString().search("Order in amount")
 	      }
 
               if (order_count_start != -1 && order_gap_start != -1 && 
 	          order_amount_start != -1) {
-                  displayTab()
                   console.log(order_count_start)
                   console.log(order_gap_start)
                   console.log(order_amount_start)
                   tabcontent = document.getElementsByClassName("tabcontent");
 		  tabcontent[0].innerHTML =
-			      data.toString().substring(order_count_start + 15,
+			      obj.innerHTML.toString().substring(order_count_start + 15,
 				      order_gap_start - 5)
 		  tabcontent[1].innerHTML =
-			      data.toString().substring(order_gap_start + 13,
+			      obj.innerHTML.toString().substring(order_gap_start + 13,
 				      order_amount_start - 5)
 		  tabcontent[2].innerHTML =
-			      data.toString().substring(order_amount_start + 16)
+			      obj.innerHTML.toString().substring(order_amount_start + 16)
+                  displayTab()
 	      }
           });
           child.stderr.on('data', function (data) {

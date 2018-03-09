@@ -10,6 +10,7 @@ const url = require('url')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let confWindow
 
 const {ipcMain} = require('electron')
 
@@ -25,6 +26,30 @@ function getAppRoot() {
   }  else if (process.platform === 'darwin') {
     return __dirname
   }
+}
+
+ipcMain.on('try-config', (event) => {
+  closeConfig()
+  event.returnValue = true
+})
+
+function closeConfig () {
+	confWindow.hide()
+}
+
+function createConfig () {
+  // Create the browser window.
+  confWindow = new BrowserWindow({width: 800, height: 600});
+
+  // confWindow.webContents.openDevTools()
+
+  // and load the index.html of the app.
+  confWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'conf.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  confWindow.show();
 }
 
 function createWindow () {
@@ -56,6 +81,10 @@ function createWindow () {
           { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
           { type: "separator" },
           { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+      ]},{
+      label: "Config",
+      submenu: [
+          { label: "Config", accelerator: "Command+B", click: createConfig }
       ]}, {
       label: "Edit",
       submenu: [

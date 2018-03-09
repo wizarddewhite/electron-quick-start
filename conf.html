@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>GapSeeker!</title>
+  </head>
+  <body>
+    <h1>Configure your account with Name and UUID.</h1>
+    <p>visit http://www.gapseeker.tk/account if you forget it</p>
+    <div class="form-group">
+      <label>Name</label>
+      <input id="uname" class="form-control" placeholder="Name" name="uname">
+    </div>
+    <div class="form-group">
+      <label>UUID</label>
+      <input id="uuid" class="form-control" placeholder="UUID" name="uuid">
+    </div>
+    <button onclick="setup()" class="fa fa-pencil-square-o" data-dismiss="alert">Setup</button>
+    <script>
+      const {ipcRenderer} = require('electron')
+      function setup() {
+          var command
+          path = ipcRenderer.sendSync('get-path')
+          if ( process.platform === 'win32' ) {
+              command = 'find_gap';
+          }  else if (process.platform === 'darwin') {
+              command = './find_gap';
+          }
+
+          uname = document.getElementById("uname");
+          uuid = document.getElementById("uuid");
+          if (uname.value.length == 0 || uuid.value.length == 0) {
+              document.getElementById("key").innerHTML = "Name or UUID is empty";
+              return;
+          }
+
+          var spawn = require('child_process').spawnSync,
+              child = spawn(command, ["config", uname.value, uuid.value], {cwd: path});
+
+	  console.log(uname.value, uuid.value)
+          //state = ipcRenderer.sendSync('try-config')
+      }
+    </script>
+  </body>
+</html>

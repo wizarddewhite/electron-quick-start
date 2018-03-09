@@ -188,7 +188,7 @@
           }
       }
 
-      function draw_exchanges(path) {
+      function draw_exchanges(path, command) {
 	  // get exchanges
           var spawn = require('child_process').spawnSync,
               child = spawn(command, ["exchanges"], {cwd: path});
@@ -225,7 +225,7 @@
           }
       }
 
-      function draw_coins(path) {
+      function draw_coins(path, command) {
 	  // get coins
           var spawn = require('child_process').spawn,
               child = spawn(command, ["coins"], {cwd: path});
@@ -263,6 +263,7 @@
       }
 
       function refresh() {
+          var command
           path = ipcRenderer.sendSync('get-path')
           if ( process.platform === 'win32' ) {
               command = 'util';
@@ -270,8 +271,8 @@
               command = './util';
           }
 
-	  draw_exchanges(path)
-	  draw_coins(path)
+	  draw_exchanges(path, command)
+	  draw_coins(path, command)
       }
 
       window.onload = refresh;

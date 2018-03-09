@@ -39,7 +39,7 @@
               child = spawn(command, ["config", uname.value, uuid.value], {cwd: path});
 
 	  console.log(uname.value, uuid.value)
-          //state = ipcRenderer.sendSync('try-config')
+          state = ipcRenderer.sendSync('try-config')
       }
     </script>
   </body>

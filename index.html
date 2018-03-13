@@ -193,7 +193,7 @@
           var spawn = require('child_process').spawnSync,
               child = spawn(command, ["exchanges"], {cwd: path});
 
-	  exs = child.stdout.toString().replace(/\n$/, '').split(" ")
+	  exs = child.stdout.toString().replace(/bigone |otcbtc /g,'').replace(/\n$/, '').split(" ")
 	  console.log(exs)
 
 	  // draw exchanges

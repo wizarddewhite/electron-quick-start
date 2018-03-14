@@ -108,7 +108,7 @@
 	    }
 	  }
 
-	  if (base.length == 1 && coins.length == 0) {
+	  if (coins.length < 0) {
             document.getElementById("output").innerHTML = "At least one quote currency\n";
             return
 	  }
@@ -231,14 +231,20 @@
               child = spawn(command, ["coins"], {cwd: path});
 
           child.stdout.on('data', function (data) {
-	      cs = data.toString().replace(/123 |1st |456 |btc |eth |usdt /g,'').replace(/\n$/,'').split(" ")
+	      cs = data.toString().replace(/123 |1st |456 /g,'').replace(/\n$/,'').split(" ")
 	      // draw coins
               coin = document.getElementById('coins');
               coin_div = document.createElement('div');
               coin_html = ""
 	      //cs = ["btc", "eth", "neo", "xmr", "eos"]
 	      for (i in cs) {
-                  coin_html +=  "<input type=\"checkbox\" name=\"coin\" value=\""+cs[i]+"\"> " + cs[i];
+		  if (cs[i] == "btc" || cs[i] == "eth" || cs[i] == "usdt") {
+                      coin_html +=  "<input type=\"checkbox\" name=\"coin\" value=\""+cs[i]+"\"> "
+			      + "<b style=\"color:DodgerBlue;\">"+ cs[i] + "</b>";
+		  } else {
+                      coin_html +=  "<input type=\"checkbox\" name=\"coin\" value=\""+cs[i]+"\"> "
+			      + cs[i];
+		  }
 	      }
               coin_div.innerHTML = coin_html;
               coin.appendChild(coin_div);

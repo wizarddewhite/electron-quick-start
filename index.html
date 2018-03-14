@@ -37,26 +37,30 @@
     <button onclick="run()" class="fa fa-pencil-square-o" data-dismiss="alert">Run</button>
     <button onclick="stop()" class="fa fa-pencil-square-o" data-dismiss="alert">Stop</button>
 
+    <br>
+    Live Watch:
+    <div>
+      <textarea id="output" cols="80" rows="10" class="form-control"></textarea>
+    </div>
+
     <!-- Tab links -->
+    <br>
+    Data analysis:
     <div class="tab">
-      <button class="tablinks" style="display:none" onclick="openCity(event, 'London')">Order in count</button>
-      <button class="tablinks" style="display:none" onclick="openCity(event, 'Paris')">Order in gap</button>
-      <button class="tablinks" style="display:none" onclick="openCity(event, 'Tokyo')">Order in amount</button>
+      <button class="tablinks" onclick="openCity(event, 'London')">Order in count</button>
+      <button class="tablinks" onclick="openCity(event, 'Paris')">Order in gap</button>
+      <button class="tablinks" onclick="openCity(event, 'Tokyo')">Order in amount</button>
     </div>
     
     <!-- Tab content -->
-    <textarea id="London" class="tabcontent" cols="90" rows="30" >
+    <textarea id="London" class="tabcontent" cols="80" rows="20" >
     </textarea>
     
-    <textarea id="Paris" class="tabcontent" cols="90" rows="30" >
+    <textarea id="Paris" class="tabcontent" cols="80" rows="20" >
     </textarea>
     
-    <textarea id="Tokyo" class="tabcontent" cols="90" rows="30" >
+    <textarea id="Tokyo" class="tabcontent" cols="80" rows="20" >
     </textarea>
-
-    <div>
-      <textarea id="output" cols="90" rows="30" class="form-control"></textarea>
-    </div>
 
     <script>
       // You can also require other files to run in this process
@@ -136,7 +140,7 @@
 		      {cwd: path});
 
           document.getElementById("output").innerHTML = "Starting...\n";
-	  hideTab()
+	  //hideTab()
           order_gap_start = -1, order_count_start = -1, order_amount_start = -1
           this.child = child;
           child.stdout.on('data', function (data) {

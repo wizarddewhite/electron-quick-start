@@ -43,3 +43,44 @@ Note: If you're using Linux Bash for Windows, [see this guide](https://www.howto
 ## License
 
 [CC0 1.0 (Public Domain)](LICENSE.md)
+
+
+## Debug Tip
+
+Comment out this in main.js.
+
+```
+--- a/main.js
++++ b/main.js
+@@ -52,7 +52,7 @@ function createWindow () {
+   }))
+
+   // Open the DevTools.
+-  // mainWindow.webContents.openDevTools()
++  mainWindow.webContents.openDevTools()
+
+   mainWindow.on('close', function (e) {
+```
+
+Then run:
+
+  node_modules\.bin\electron .
+
+## Build Tip
+
+Prepare npm and electron. (Need to fix this.)
+
+Put following files in source directory for Mac or ./build for Windows:
+
+  * free2ctl
+  * freeland
+  * geoip.dat
+  * geosite.dat
+
+On Mac:
+
+    electron-packager ./
+
+On Windows:
+
+    node_modules\.bin\electron-builder -w
